@@ -3,9 +3,12 @@ require 'json'
 require 'pg'
 
 class WGAPI
-  attr_reader :application_id
-  def initialize
-    @application_id = ENV['APPLICATION_ID']
+  attr_accessor :application_id
+  attr_accessor :database_url
+
+  def initialize(application_id:, database_url:)
+    self.application_id = application_id
+    self.database_url = database_url
   end
   def GetClanMembers(clan_id)
     url = "https://api.wotblitz.asia/wotb/clans/info/?application_id=#{application_id}&clan_id=#{clan_id}&fields=tag%2Cmembers_ids"
@@ -35,6 +38,12 @@ class WGAPI
   def GetMembersData(member_ids)
     access_token = self.GetAccessToken(1)
     url = "https://api.wotblitz.asia/wotb/account/info/?application_id=#{application_id}&access_token=#{access_token}&account_id=#{member_ids}&fields=nickname%2Clast_battle_time"
+    client = HTTPClient.new
+    response = client.get(url)
+    results = JSON.parse(response.body)
+  end
+  def GetMembersClan(member_ids)
+    url = "https://api.wotblitz.asia/wotb/clans/accountinfo/?application_id=#{application_id}&account_id=#{member_ids}"
     client = HTTPClient.new
     response = client.get(url)
     results = JSON.parse(response.body)
